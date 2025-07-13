@@ -1,6 +1,6 @@
 import { useApiClient } from "@/utils/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { getMediaLibraryPermissionsAsync, launchCameraAsync, launchImageLibraryAsync, requestCameraPermissionsAsync } from 'expo-image-picker';
+import { launchCameraAsync, launchImageLibraryAsync, requestCameraPermissionsAsync, requestMediaLibraryPermissionsAsync } from 'expo-image-picker';
 import { useState } from "react";
 import { Alert } from "react-native";
 
@@ -14,10 +14,10 @@ export const useCreatePost = () => {
     const createPostMutation = useMutation({
         mutationFn: async (postData: { content: string, imageUri?: string }) => {
             const formData = new FormData()
-            if (postData.content) formData.append("content", postData.content)
+            if (postData.content) formData.append("content", postData.content);
 
             if (postData.imageUri) {
-                const uriParts = postData.imageUri.split('.')
+                const uriParts = postData.imageUri.split(".")
                 const fileType = uriParts[uriParts.length - 1].toLowerCase()
                 const mimeTypeMap: Record<string, string> = {
                     png: "image/png",
@@ -46,24 +46,25 @@ export const useCreatePost = () => {
             Alert.alert("Success", "Post created successfully")
         },
 
-        onError: () => {
+        onError: (error) => {
+            console.log("Error creating post: ", error)
             Alert.alert("Error", "Failed to create post. Please try again.")
         }
     })
 
 
     const handleImagePicker = async (useCamera: boolean = false) => {
-        const permissionResult = useCamera ? await requestCameraPermissionsAsync() : await getMediaLibraryPermissionsAsync()
+        const permissionResult = useCamera ? await requestCameraPermissionsAsync() : await requestMediaLibraryPermissionsAsync()
 
-        if (!permissionResult.granted) {
+        if (permissionResult.status !== "granted") {
             const source = useCamera ? "camera" : "photo library"
             Alert.alert("Permission needed", `Please grant permission to access your ${source}`)
             return;
         }
 
         const pickerOptions = {
-            allowEditing: true,
-            aspects: [16, 9] as [number, number],
+            allowsEditing: true,
+            aspect: [16, 9] as [number, number],
             quality: 0.8,
         }
 

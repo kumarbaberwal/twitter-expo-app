@@ -1,8 +1,9 @@
-import { useAuth } from "@clerk/clerk-expo"
-import axios, { AxiosInstance } from 'axios'
+import { useAuth } from "@clerk/clerk-expo";
+import axios, { AxiosInstance } from 'axios';
 
 
 export const API_URL = "https://twitter-node-js.vercel.app"
+// const API_URL = "http://192.168.145.140:3000/api";
 
 
 export const createApiClient = (getToken: () => Promise<string | null>): AxiosInstance => {
