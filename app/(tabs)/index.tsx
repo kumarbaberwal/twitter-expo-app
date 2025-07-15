@@ -1,4 +1,5 @@
 import PostComposer from "@/components/PostComposer";
+import PostsList from "@/components/PostsList";
 import SignOutButton from "@/components/SignOutButton";
 import { useUserSync } from "@/hooks/useUserSync";
 import { Ionicons } from "@expo/vector-icons";
@@ -28,6 +29,7 @@ export default function Index() {
                 }}
             >
                 <PostComposer />
+                <PostsList />
             </ScrollView>
         </SafeAreaView>
     );
