@@ -1,13 +1,17 @@
 import { useCurrentUser } from "@/hooks/useCurrentUser"
 import { usePosts } from "@/hooks/usePosts"
 import { Post } from "@/types"
-import React from 'react'
+import React, { useState } from 'react'
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native'
+import CommentsModal from "./CommentsModal"
 import PostCard from "./PostCard"
 
 export default function PostsList() {
   const { currentUser } = useCurrentUser()
   const { posts, isLoading, error, refetch, toggleLike, deletePost, checkIsLiked } = usePosts()
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
+
+  const selectedPost = selectedPostId ? posts.find((p: Post) => p._id === selectedPostId) : null
 
   if (isLoading) {
     return (
@@ -54,10 +58,13 @@ export default function PostsList() {
           post={post}
           onLike={toggleLike}
           onDelete={deletePost}
+          onComment={(postId: string) => setSelectedPostId(post._id)}
           currentUser={currentUser}
           isLiked={checkIsLiked(post.likes, currentUser)}
         />
       ))}
+
+      <CommentsModal selectedPost={selectedPost} onClose={() => setSelectedPostId(null)} />
     </>
   )
 }   

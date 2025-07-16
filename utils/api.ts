@@ -3,7 +3,7 @@ import axios, { AxiosInstance } from 'axios';
 
 
 export const API_URL = "https://twitter-node-js.vercel.app"
-// const API_URL = "http://192.168.145.140:3000/api";
+// const API_URL = "http://192.168.109.140:3000";
 
 
 export const createApiClient = (getToken: () => Promise<string | null>): AxiosInstance => {
