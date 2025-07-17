@@ -13,7 +13,7 @@ export default function CommentsModal({ selectedPost, onClose }: CommentsModalPr
   const { commentText, setCommentText, createComment, isCreatingComment } = useComments()
   const { currentUser } = useCurrentUser()
 
-  console.log("Content", selectedPost.comments)
+  // console.log("Content", selectedPost?.comments)
 
   const handleClose = () => {
     onClose();
