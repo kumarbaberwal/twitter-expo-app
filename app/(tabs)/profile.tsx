@@ -1,15 +1,18 @@
+import EditProfileModal from "@/components/EditProfileModal"
 import PostsList from "@/components/PostsList"
 import SignOutButton from "@/components/SignOutButton"
 import { useCurrentUser } from "@/hooks/useCurrentUser"
 import { usePosts } from "@/hooks/usePosts"
+import { useProfile } from "@/hooks/useProfile"
 import { Feather } from "@expo/vector-icons"
 import { format } from "date-fns"
 import React from 'react'
-import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Image, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 
 export default function Profile() {
   const { currentUser, isLoading } = useCurrentUser()
+  const { isEditModalVisible, openEditModal, closeEditModal, formData, updateFormField, saveProfile, isUpdating, refetch: refetchProfile } = useProfile()
   const { posts: userPosts, refetch: refetchPosts, isLoading: isRefetching } = usePosts(currentUser?.userName)
   const insets = useSafeAreaInsets()
 
@@ -21,13 +24,13 @@ export default function Profile() {
     )
   }
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
       <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-100">
         <View>
           <Text className="text-xl font-bold text-gray-900">
             {currentUser.firstName} {currentUser.lastName}
           </Text>
-          <Text className="text-gray-500 text-sm">{userPosts.length}</Text>
+          <Text className="text-gray-500 text-sm">{userPosts?.length}</Text>
         </View>
         <SignOutButton />
       </View>
@@ -38,6 +41,17 @@ export default function Profile() {
         contentContainerStyle={{
           paddingBottom: insets.bottom + 100,
         }}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={() => {
+              refetchProfile()
+              refetchPosts()
+            }}
+            colors={["#1da1f2"]}
+            tintColor={"#1da1f2"}
+          />
+        }
       >
         <Image
           source={{ uri: currentUser.bannerImage || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop" }}
@@ -55,6 +69,7 @@ export default function Profile() {
 
             <TouchableOpacity
               className="border border-gray-300 px-6 py-2 rounded-full"
+              onPress={() => openEditModal()}
             >
               <Text className="font-semibold text-gray-900">
                 Edit Profile
@@ -79,7 +94,7 @@ export default function Profile() {
             <View className="flex-row items-center mb-2">
               <Feather name="map-pin" size={16} color={"#657786"} />
               <Text className="text-gray-500 ml-2">
-                {currentUser.location}India
+                {currentUser.location}
               </Text>
             </View>
 
@@ -109,6 +124,15 @@ export default function Profile() {
 
         <PostsList userName={currentUser?.userName} />
       </ScrollView>
+
+      <EditProfileModal
+        isVisible={isEditModalVisible}
+        onClose={closeEditModal}
+        formData={formData}
+        saveProfile={saveProfile}
+        updateFormField={updateFormField}
+        isUpdating={isUpdating}
+      />
     </SafeAreaView>
   )
 }
