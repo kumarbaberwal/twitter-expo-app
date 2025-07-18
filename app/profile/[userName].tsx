@@ -1,19 +1,23 @@
-import EditProfileModal from "@/components/EditProfileModal"
 import PostsList from "@/components/PostsList"
-import SignOutButton from "@/components/SignOutButton"
-import { useCurrentUser } from "@/hooks/useCurrentUser"
 import { usePosts } from "@/hooks/usePosts"
-import { useProfile } from "@/hooks/useProfile"
-import { Feather } from "@expo/vector-icons"
+import { useTargetUserProfile } from "@/hooks/useTargetUserProfile"
+import { Feather, MaterialIcons } from "@expo/vector-icons"
 import { format } from "date-fns"
+import { useLocalSearchParams, useRouter } from "expo-router"
 import React from 'react'
 import { ActivityIndicator, Image, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 
-export default function Profile() {
-  const { currentUser, isLoading } = useCurrentUser()
-  const { isEditModalVisible, openEditModal, closeEditModal, formData, updateFormField, saveProfile, isUpdating, refetch: refetchProfile } = useProfile()
-  const { posts: userPosts, refetch: refetchPosts, isLoading: isRefetching } = usePosts(currentUser?.userName)
+export default function ProfileScreen() {
+  const { userName } = useLocalSearchParams()
+  const targetUserName = Array.isArray(userName) ? userName[0] : userName; // safest
+  const router = useRouter()
+  // console.log("UserName: ", targetUserName)
+  const { user: targetUser, isLoading, refetch: refetchUser, isFollowing, handleFollowUnfollowUser } = useTargetUserProfile({ targetUserName: targetUserName })
+  // console.log("CurrentUser: ", targetUser)
+  const { posts: targetUserPosts, refetch: refetchPosts, isLoading: isRefetching } = usePosts(targetUser?.userName)
+
+
   const insets = useSafeAreaInsets()
 
   if (isLoading) {
@@ -28,24 +32,29 @@ export default function Profile() {
       <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-100">
         <View>
           <Text className="text-xl font-bold text-gray-900">
-            {currentUser.firstName} {currentUser.lastName}
+            {targetUser.firstName} {targetUser.lastName}
           </Text>
-          <Text className="text-gray-500 text-sm">{userPosts?.length} {userPosts?.length > 1 ? "Posts" : "Post"}</Text>
+          <Text className="text-gray-500 text-sm">{targetUserPosts?.length} {targetUserPosts?.length > 1 ? "Posts" : "Post"}</Text>
         </View>
-        <SignOutButton />
+        <TouchableOpacity
+          className="justify-center items-center bg-transparent"
+          onPress={() => router.back()}
+        >
+          <MaterialIcons name="close" size={36} color={"#1F2937"} />
+        </TouchableOpacity>
       </View>
 
 
       <ScrollView className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingBottom: insets.bottom + 100,
+          paddingBottom: insets.bottom + 50,
         }}
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}
             onRefresh={() => {
-              refetchProfile()
+              refetchUser()
               refetchPosts()
             }}
             colors={["#1da1f2"]}
@@ -54,7 +63,7 @@ export default function Profile() {
         }
       >
         <Image
-          source={{ uri: currentUser.bannerImage || "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop" }}
+          source={{ uri: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop" }}
           className="w-full h-48"
           resizeMode="cover"
         />
@@ -63,16 +72,16 @@ export default function Profile() {
         <View className="px-4 pb-4 border-b border-gray-100">
           <View className="flex-row justify-between items-end -mt-16 mb-4">
             <Image
-              source={{ uri: currentUser.profilePicture }}
+              source={{ uri: targetUser.profilePicture }}
               className="w-32 h-32 rounded-full border-4 border-white"
             />
 
             <TouchableOpacity
-              className="border border-gray-300 px-6 py-2 rounded-full"
-              onPress={() => openEditModal()}
+              className={`${isFollowing ? "bg-black border border-white" : "border border-gray-300"} px-6 py-2 rounded-full`}
+              onPress={() => handleFollowUnfollowUser(targetUser._id)}
             >
-              <Text className="font-semibold text-gray-900">
-                Edit Profile
+              <Text className={`font-semibold ${isFollowing ? "text-white" : "text-gray-900"}`}>
+                {isFollowing ? "Following" : "Follow"}
               </Text>
             </TouchableOpacity>
           </View>
@@ -80,27 +89,27 @@ export default function Profile() {
           <View className="mb-4">
             <View className="flex-row items-center mb-1">
               <Text className="text-xl font-bold text-gray-900 mr-1">
-                {currentUser.firstName} {currentUser.lastName}
+                {targetUser.firstName} {targetUser.lastName}
               </Text>
               <Feather name="check-circle" size={20} color={"#1da1f2"} />
             </View>
             <Text className="text-gray-500 mb-2">
-              @{currentUser.userName}
+              @{targetUser.userName}
             </Text>
             <Text className="text-gray-900 mb-3">
-              {currentUser.bio}
+              {targetUser.bio}
             </Text>
 
             <View className="flex-row items-center mb-2">
               <Feather name="map-pin" size={16} color={"#657786"} />
               <Text className="text-gray-500 ml-2">
-                {currentUser.location}
+                {targetUser.location}
               </Text>
             </View>
 
             <View className="flex-row items-center mb-3">
               <Feather name="calendar" size={16} color={"#657786"} />
-              <Text className="text-gray-500 ml-2">Joined {format(new Date(currentUser.createdAt), "MMMM yyyy")}</Text>
+              <Text className="text-gray-500 ml-2">Joined {format(new Date(targetUser.createdAt), "MMMM yyyy")}</Text>
             </View>
 
             <View className="flex-row">
@@ -108,13 +117,13 @@ export default function Profile() {
                 className="mr-6"
               >
                 <Text className="text-gray-900">
-                  <Text className="font-bold">{currentUser.following?.length}</Text>
+                  <Text className="font-bold">{targetUser.following?.length}</Text>
                   <Text className="text-gray-500"> Following</Text>
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity>
                 <Text className="text-gray-900">
-                  <Text className="font-bold">{currentUser.followers?.length}</Text>
+                  <Text className="font-bold">{targetUser.followers?.length}</Text>
                   <Text className="text-gray-500"> Followers</Text>
                 </Text>
               </TouchableOpacity>
@@ -122,17 +131,8 @@ export default function Profile() {
           </View>
         </View>
 
-        <PostsList userName={currentUser?.userName} />
+        <PostsList userName={targetUser?.userName} />
       </ScrollView>
-
-      <EditProfileModal
-        isVisible={isEditModalVisible}
-        onClose={closeEditModal}
-        formData={formData}
-        saveProfile={saveProfile}
-        updateFormField={updateFormField}
-        isUpdating={isUpdating}
-      />
     </SafeAreaView>
   )
 }

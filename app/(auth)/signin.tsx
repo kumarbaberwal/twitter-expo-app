@@ -1,7 +1,7 @@
 import { useSocialAuth } from "@/hooks/useSocialAuth";
 import { ActivityIndicator, Image, Text, TouchableOpacity, View } from "react-native";
 
-export default function Index() {
+export default function Signin() {
   const { isLoading, handleSocialAuth } = useSocialAuth();
   return (
     <View className="flex-1 bg-white">

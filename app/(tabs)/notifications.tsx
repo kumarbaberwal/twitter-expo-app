@@ -8,7 +8,7 @@ import { ActivityIndicator, RefreshControl, ScrollView, Text, TouchableOpacity, 
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 
 export default function Notifications() {
-  const { notifications, isLoading, error, refetch, isRefetching, deleteNotification, isDeletingNotification } = useNotifications()
+  const { notifications, isLoading, error, refetch, isRefetching, deleteNotification, } = useNotifications()
   const insets = useSafeAreaInsets()
 
   if (error) {

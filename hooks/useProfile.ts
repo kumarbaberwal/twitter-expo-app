@@ -19,7 +19,6 @@ export const useProfile = () => {
 
   const { currentUser } = useCurrentUser()
 
-
   const updateProfileMutation = useMutation({
     mutationFn: (profileData: any) => userApi.updateProfile(api, profileData),
     onSuccess: () => {
@@ -31,6 +30,15 @@ export const useProfile = () => {
       Alert.alert("Error", error.response?.data?.error || "Failed to update profile")
     }
   })
+
+  const followUserMutation = useMutation({
+    mutationFn: (targetUserId: string) => userApi.followUser(api, targetUserId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["targetUser"] }),
+  })
+
+  const followUser = async (targetUserId: string) => {
+    followUserMutation.mutate(targetUserId)
+  }
 
   const openEditModal = () => {
     if (currentUser) {
@@ -57,6 +65,7 @@ export const useProfile = () => {
     saveProfile: () => updateProfileMutation.mutate(formData),
     updateFormField,
     isUpdating: updateProfileMutation.isPending,
-    refetch: () => queryClient.invalidateQueries({ queryKey: ["authUser"] })
+    refetch: () => queryClient.invalidateQueries({ queryKey: ["authUser"] }),
+    followUser,
   }
 }

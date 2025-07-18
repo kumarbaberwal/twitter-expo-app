@@ -1,6 +1,7 @@
 import { Post, User } from "@/types";
 import { formatDate, formatNumber } from "@/utils/formatters";
 import { AntDesign, Feather } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React from 'react';
 import { Alert, Image, Text, TouchableOpacity, View } from 'react-native';
 
@@ -14,6 +15,7 @@ interface PostCardProps {
 }
 
 export default function PostCard({ post, onLike, onDelete, onComment, isLiked, currentUser }: PostCardProps) {
+  const router = useRouter();
 
   const isOwnPost = post.user._id === currentUser?._id
 
@@ -34,9 +36,13 @@ export default function PostCard({ post, onLike, onDelete, onComment, isLiked, c
   return (
     <View className="border-b border-gray-100 bg-white">
       <View className="flex-row p-4">
-        <Image source={{ uri: post.user.profilePicture || "" }}
-          className="w-12 h-12 rounded-full mr-3"
-        />
+        <TouchableOpacity
+          onPress={() => post.user._id === currentUser._id ? router.push('/(tabs)/profile') : router.push({ pathname: "/profile/[userName]", params: { userName: post.user.userName } })}
+        >
+          <Image source={{ uri: post.user.profilePicture || "" }}
+            className="w-12 h-12 rounded-full mr-3"
+          />
+        </TouchableOpacity>
 
         <View className="flex-1">
           <View className="flex-row items-center justify-between mb-1">
@@ -50,7 +56,7 @@ export default function PostCard({ post, onLike, onDelete, onComment, isLiked, c
             </View>
             {isOwnPost && (
               <TouchableOpacity onPress={handleDelete}>
-                <Feather name="trash" size={20} color={"#657786"} />
+                <Feather name="trash" size={20} color={"red"} />
               </TouchableOpacity>
             )}
           </View>

@@ -8,7 +8,7 @@ export default function TabsLayout() {
     const insets = useSafeAreaInsets();
     const { isSignedIn } = useAuth();
     if (!isSignedIn) {
-        return <Redirect href={'/(auth)'} />
+        return <Redirect href={'/(auth)/signin'} />
     }
     return (
         <Tabs
