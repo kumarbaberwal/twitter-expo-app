@@ -25,6 +25,11 @@ export const useComments = () => {
         }
     })
 
+    const deleteCommentMutation = useMutation({
+        mutationFn: (commentId: string) => commentApi.deleteComment(api, commentId),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["posts"] }),
+    })
+
     const createComment = (postId: string) => {
         if (!commentText.trim()) {
             Alert.alert("Empty Comment", "Please write something before posting!")
@@ -39,5 +44,7 @@ export const useComments = () => {
         setCommentText,
         createComment,
         isCreatingComment: createCommentMutation.isPending,
+        deleteComment: (commentId: string) => deleteCommentMutation.mutate(commentId),
+        isDeletingComment: deleteCommentMutation.isPending,
     }
 }
